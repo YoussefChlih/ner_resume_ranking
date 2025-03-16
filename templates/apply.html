@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Apply for Job - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="apply-container">
+    <div class="job-header">
+        <div class="job-info">
+            <h2>Apply for: {{ job.title }}</h2>
+        </div>
+        
+        <div class="back-link">
+            <a href="{{ url_for('candidate') }}" class="btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="two-panel">
+        <!-- Left Panel: Job Details -->
+        <div class="panel job-details-panel">
+            <h3>Job Description</h3>
+            <div class="job-description">
+                {{ job.description }}
+            </div>
+            
+            <div class="job-meta">
+                <p><strong>Posted:</strong> {{ job.posted_date.strftime('%Y-%m-%d') }}</p>
+                <p><strong>Status:</strong> {{ job.status }}</p>
+            </div>
+            
+            {% if job.keywords %}
+            <div class="keywords-section">
+                <h4>Relevant Keywords</h4>
+                <div class="keywords-list">
+                    {% for keyword in job.keywords %}
+                    <div class="keyword-tag">
+                        <span class="keyword-text">{{ keyword }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                <p class="keyword-tip">Including these keywords in your resume may improve your match score.</p>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Panel: Application Form -->
+        <div class="panel application-panel">
+            <h3>Submit Your Application</h3>
+            <form method="POST" action="{{ url_for('apply', job_id=job._id) }}" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="resume">Upload Resume (PDF only)</label>
+                    <input type="file" id="resume" name="resume" accept=".pdf" required>
+                    <small>Our system will analyze your resume using Named Entity Recognition (NER) to match with the job requirements.</small>
+                </div>
+                
+                <div class="optimization-tips">
+                    <h4>Resume Optimization Tips</h4>
+                    <ul>
+                        <li>Make sure your resume clearly lists your <strong>skills</strong>, <strong>experience</strong>, and <strong>education</strong></li>
+                        <li>Include relevant <strong>keywords</strong> from the job description</li>
+                        <li>Use clear section headings that our system can recognize</li>
+                    </ul>
+                </div>
+                
+                <button type="submit" class="btn">Submit Application</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

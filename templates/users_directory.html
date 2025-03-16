@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block title %}Users Directory - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="users-directory-container">
+    <h2>Users Directory</h2>
+    <p>Find users to connect with and send messages.</p>
+    
+    <div class="search-box">
+        <input type="text" id="user-search" placeholder="Search users...">
+    </div>
+    
+    <div class="users-directory">
+        {% for user in users %}
+            <div class="user-card" data-username="{{ user.username }}" data-type="{{ user.user_type }}">
+                <div class="user-picture">
+                    {% if user.profile and user.profile.profile_picture %}
+                        <img src="{{ url_for('static', filename=user.profile.profile_picture) }}" alt="{{ user.username }}">
+                    {% else %}
+                        {{ user.username[0].upper() }}
+                    {% endif %}
+                </div>
+                
+                <h3 class="user-name">{{ user.username }}</h3>
+                <span class="user-type">{{ user.user_type|capitalize }}</span>
+                
+                {% if user.profile %}
+                    {% if user.profile.full_name %}
+                        <p class="user-full-name">{{ user.profile.full_name }}</p>
+                    {% endif %}
+                    
+                    {% if user.profile.location %}
+                        <p class="user-location">{{ user.profile.location }}</p>
+                    {% endif %}
+                {% endif %}
+                
+                <div class="user-actions">
+                    <a href="{{ url_for('send_message', user_id=user._id) }}" class="btn btn-small">Send Message</a>
+                    
+                    {% if user.user_type == 'candidate' and session.user_type == 'recruiter' %}
+                        <a href="{{ url_for('contact_candidate', candidate_id=user._id) }}" class="btn btn-small btn-primary">View Profile</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // User search functionality
+        const searchInput = document.getElementById('user-search');
+        const userCards = document.querySelectorAll('.user-card');
+        
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                
+                userCards.forEach(card => {
+                    const username = card.dataset.username.toLowerCase();
+                    const userType = card.dataset.type.toLowerCase();
+                    const nameElement = card.querySelector('.user-name');
+                    const fullNameElement = card.querySelector('.user-full-name');
+                    
+                    let nameMatch = username.includes(searchTerm);
+                    let typeMatch = userType.includes(searchTerm);
+                    let fullNameMatch = false;
+                    
+                    if (fullNameElement) {
+                        fullNameMatch = fullNameElement.textContent.toLowerCase().includes(searchTerm);
+                    }
+                    
+                    if (nameMatch || typeMatch || fullNameMatch) {
+                        card.style.display = 'flex';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}

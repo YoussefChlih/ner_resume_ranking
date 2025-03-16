@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Appointments - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="appointments-container">
+    <h2>Your Scheduled Interviews</h2>
+    
+    {% if appointments %}
+        <div class="appointments-list">
+            {% for appointment in appointments %}
+                <div class="appointment-card">
+                    <div class="appointment-header">
+                        <h3>{{ appointment.job_title }}</h3>
+                        <span class="appointment-date">{{ appointment.interview_datetime.strftime('%A, %B %d, %Y') }}</span>
+                        <span class="appointment-time">{{ appointment.interview_datetime.strftime('%I:%M %p') }}</span>
+                    </div>
+                    
+                    <div class="appointment-details">
+                        <p><strong>Type:</strong> {{ appointment.interview_type }}</p>
+                        
+                        {% if user_type == 'recruiter' %}
+                            <p><strong>Candidate:</strong> {{ appointment.candidate_name }}</p>
+                        {% else %}
+                            <p><strong>Recruiter:</strong> {{ appointment.recruiter_name }}</p>
+                        {% endif %}
+                        
+                        <p><strong>Details:</strong> {{ appointment.interview_details }}</p>
+                        <p><strong>Status:</strong> {{ appointment.status }}</p>
+                    </div>
+                    
+                    {% if user_type == 'recruiter' %}
+                        <div class="appointment-actions">
+                            <a href="#" class="btn btn-small">Reschedule</a>
+                            <a href="#" class="btn btn-small btn-danger">Cancel</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-data">You have no scheduled interviews at this time.</p>
+    {% endif %}
+</div>
+{% endblock %}

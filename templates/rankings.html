@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Rankings - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="rankings-container">
+    <div class="job-header">
+        <div class="job-info">
+            <h2>{{ job.title }} - Candidate Rankings</h2>
+            <p><strong>Posted:</strong> {{ job.posted_date.strftime('%Y-%m-%d') }}</p>
+            <p><strong>Status:</strong> {{ job.status }}</p>
+        </div>
+        
+        <div class="back-link">
+            <a href="{{ url_for('recruiter') }}" class="btn">← Back to Dashboard</a>
+        </div>
+    </div>
+    
+    <div class="job-description">
+        <h3>Job Description</h3>
+        <div class="description-text">
+            {{ job.description }}
+        </div>
+        
+        {% if job.keywords %}
+        <div class="keywords-section">
+            <h4>Weighted Keywords</h4>
+            <div class="keywords-list">
+                {% for keyword, weight in job.keywords.items() %}
+                <div class="keyword-tag">
+                    <span class="keyword-text">{{ keyword }}</span>
+                    <span class="keyword-weight">{{ weight }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <h3>Candidate Rankings</h3>
+    {% if ranked_applicants %}
+        <div class="rankings-list">
+            {% for applicant in ranked_applicants %}
+                <div class="ranking-card">
+                    <div class="ranking-header">
+                        <h4 class="applicant-name">{{ applicant.name }}</h4>
+                        <div class="match-score">
+                            <span class="match-percentage">{{ applicant.match_percentage }}%</span>
+                            <span class="match-label">Match</span>
+                        </div>
+                    </div>
+                    
+                    <div class="entity-sections">
+                        {% if applicant.entities.get('COMPETENCES') %}
+                            <div class="entity-section">
+                                <h5>Skills</h5>
+                                <ul class="entity-list">
+                                    {% for skill in applicant.entities.get('COMPETENCES')[:5] %}
+                                        <li>{{ skill }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        
+                        {% if applicant.entities.get('EXPERIENCE') %}
+                            <div class="entity-section">
+                                <h5>Experience</h5>
+                                <ul class="entity-list">
+                                    {% for exp in applicant.entities.get('EXPERIENCE')[:3] %}
+                                        <li>{{ exp }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                        
+                        {% if applicant.entities.get('DIPLOME') %}
+                            <div class="entity-section">
+                                <h5>Education</h5>
+                                <ul class="entity-list">
+                                    {% for edu in applicant.entities.get('DIPLOME')[:2] %}
+                                        <li>{{ edu }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- New section for relevance factors -->
+                    <div class="relevance-factors">
+                        <h5>Relevance Factors</h5>
+                        <ul>
+                            {% for factor in applicant.relevance_factors %}
+                                <li>{{ factor }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <!-- New section for keyword matches -->
+                    <div class="keyword-matches">
+                        <h5>Keyword Matches</h5>
+                        <ul>
+                            {% for match in applicant.keyword_matches %}
+                                <li>{{ match }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    
+                    <div class="ranking-actions">
+                        <button class="btn btn-small toggle-details">View Details</button>
+                        <a href="#" class="btn btn-small">Contact</a>
+                    </div>
+                    
+                    <!-- New collapsible section for detailed relevance information -->
+                    <div class="relevance-details" style="display: none;">
+                        <h5>Why This Candidate Matches</h5>
+                        <ul class="relevance-factors">
+                            {% for factor in applicant.relevance_factors %}
+                                <li>{{ factor }}</li>
+                            {% endfor %}
+                        </ul>
+                        
+                        {% if applicant.keyword_matches %}
+                            <h5>Keywords Matched</h5>
+                            <ul class="keyword-matches">
+                                {% for match in applicant.keyword_matches %}
+                                    <li>{{ match }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="full-details" style="display: none;">
+                        <h5>All Extracted Information</h5>
+                        {% for entity_type, entities in applicant.entities.items() %}
+                            <div class="detail-section">
+                                <h6>{{ entity_type }}</h6>
+                                <ul>
+                                    {% for entity in entities %}
+                                        <li>{{ entity }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-data">No applications have been received for this job yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

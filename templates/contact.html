@@ -1,0 +1,169 @@
+{% extends "base.html" %}
+
+{% block title %}Contact Candidate - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="contact-container">
+    <div class="contact-header">
+        <h2>Contact {{ candidate.username }}</h2>
+        
+        <div class="back-link">
+            {% if selected_job %}
+                <a href="{{ url_for('rankings', job_id=selected_job._id) }}" class="btn">← Back to Rankings</a>
+            {% else %}
+                <a href="{{ url_for('recruiter') }}" class="btn">← Back to Dashboard</a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="two-panel">
+        <!-- Left Panel: Candidate Details -->
+        <div class="panel contact-info-panel">
+            <h3>Candidate Information</h3>
+            
+            {% if profile %}
+                <div class="contact-info">
+                    {% if profile.profile_picture %}
+                        <div class="profile-picture">
+                            <img src="{{ url_for('static', filename=profile.profile_picture) }}" alt="Profile Picture">
+                        </div>
+                    {% endif %}
+                    
+                    <div class="info-group">
+                        <h4>Personal Details</h4>
+                        {% if profile.full_name %}
+                            <p><strong>Full Name:</strong> {{ profile.full_name }}</p>
+                        {% endif %}
+                        
+                        {% if profile.email %}
+                            <p><strong>Email:</strong> {{ profile.email }}</p>
+                        {% endif %}
+                        
+                        {% if profile.phone %}
+                            <p><strong>Phone:</strong> {{ profile.phone }}</p>
+                        {% endif %}
+                        
+                        {% if profile.location %}
+                            <p><strong>Location:</strong> {{ profile.location }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="info-group">
+                        <h4>Professional Links</h4>
+                        {% if profile.linkedin %}
+                            <p><strong>LinkedIn:</strong> <a href="{{ profile.linkedin }}" target="_blank">{{ profile.linkedin }}</a></p>
+                        {% endif %}
+                        
+                        {% if profile.github %}
+                            <p><strong>GitHub:</strong> <a href="{{ profile.github }}" target="_blank">{{ profile.github }}</a></p>
+                        {% endif %}
+                        
+                        {% if profile.website %}
+                            <p><strong>Website:</strong> <a href="{{ profile.website }}" target="_blank">{{ profile.website }}</a></p>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Additional Candidate Details -->
+                    <div class="info-group">
+                        <h4>Skills & Experience</h4>
+                        {% if candidate_skills %}
+                            <div class="skills-tags">
+                                {% for skill in candidate_skills %}
+                                    <span class="skill-tag">{{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <p>No skills information available</p>
+                        {% endif %}
+                        
+                        {% if candidate_experience %}
+                            <h5>Experience</h5>
+                            <ul class="experience-list">
+                                {% for exp in candidate_experience %}
+                                    <li>{{ exp }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        
+                        {% if candidate_education %}
+                            <h5>Education</h5>
+                            <ul class="education-list">
+                                {% for edu in candidate_education %}
+                                    <li>{{ edu }}</li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Applications History -->
+                    <div class="info-group">
+                        <h4>Applications History</h4>
+                        {% if applications_history %}
+                            <ul class="applications-list">
+                                {% for app in applications_history %}
+                                    <li>
+                                        <strong>{{ app.job_title }}</strong>
+                                        <span class="application-date">Applied: {{ app.applied_date.strftime('%Y-%m-%d') }}</span>
+                                        <span class="application-status">Status: {{ app.status }}</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% else %}
+                            <p>No previous applications</p>
+                        {% endif %}
+                    </div>
+                    
+                    {% if profile.bio %}
+                        <div class="info-group">
+                            <h4>Bio</h4>
+                            <p>{{ profile.bio }}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Direct Message Button -->
+                <div class="contact-actions">
+                    <a href="{{ url_for('send_message', user_id=candidate._id) }}" class="btn">Send Direct Message</a>
+                </div>
+            {% else %}
+                <p class="no-data">This candidate has not completed their profile yet.</p>
+                
+                <!-- Still provide message option even without profile -->
+                <div class="contact-actions">
+                    <a href="{{ url_for('send_message', user_id=candidate._id) }}" class="btn">Send Direct Message</a>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Right Panel: Message Form -->
+        <div class="panel message-panel">
+            <h3>Send Job-Related Message</h3>
+            
+            <form method="POST" action="{{ url_for('contact_candidate', candidate_id=candidate._id) }}">
+                <div class="form-group">
+                    <label for="job_id">Related Job (Optional)</label>
+                    <select id="job_id" name="job_id">
+                        <option value="">-- Select a job --</option>
+                        {% for job in jobs %}
+                            <option value="{{ job._id }}" {% if selected_job and selected_job._id == job._id %}selected{% endif %}>{{ job.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject</label>
+                    <input type="text" id="subject" name="subject" required 
+                           {% if selected_job %}value="Regarding your application for {{ selected_job.title }}"{% endif %}>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="8" required></textarea>
+                </div>
+                
+                <button type="submit" class="btn">Send Message</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

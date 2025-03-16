@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Recruiter Dashboard - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="recruiter-container">
+    <h2>Recruiter Dashboard</h2>
+    <p>Welcome, {{ session.username }}!</p>
+    
+    <div class="two-panel">
+        <!-- Left Panel: Job Listings -->
+        <div class="panel job-list-panel">
+            <h3>Your Job Listings</h3>
+            
+            {% if jobs %}
+                <div class="jobs-list">
+                    {% for job in jobs %}
+                    <div class="job-card">
+                        <h4>{{ job.title }}</h4>
+                        <p class="job-date">Posted on: {{ job.posted_date.strftime('%Y-%m-%d') }}</p>
+                        <p class="job-status">Status: {{ job.status }}</p>
+                        <div class="job-actions">
+                            <a href="{{ url_for('rankings', job_id=job._id) }}" class="btn btn-small">View Rankings</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-data">You haven't posted any jobs yet.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Right Panel: Post Job Form -->
+        <div class="panel post-job-panel">
+            <h3>Post a New Job</h3>
+            
+            <form method="POST" action="{{ url_for('recruiter') }}">
+                <div class="form-group">
+                    <label for="title">Job Title</label>
+                    <input type="text" id="title" name="title" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Job Description</label>
+                    <textarea id="description" name="description" rows="8" required></textarea>
+                    <small>Include details about required skills, qualifications, and responsibilities.</small>
+                </div>
+                
+                <div class="form-group">
+                    <h4>Keyword Weighting</h4>
+                    <p class="keyword-info">Assign weights to important keywords (0.0-1.0). Higher values give more importance during matching.</p>
+                    
+                    <div class="keywords-container">
+                        <div class="keyword-row">
+                            <input type="text" name="keyword[]" placeholder="Keyword (e.g. Python)">
+                            <input type="number" name="weight[]" placeholder="Weight" min="0" max="1" step="0.1" value="0.5">
+                        </div>
+                        <div class="keyword-row">
+                            <input type="text" name="keyword[]" placeholder="Keyword">
+                            <input type="number" name="weight[]" placeholder="Weight" min="0" max="1" step="0.1" value="0.5">
+                        </div>
+                    </div>
+                    <button type="button" id="add-keyword" class="btn btn-small">+ Add Keyword</button>
+                </div>
+                
+                <button type="submit" class="btn">Post Job</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Candidate Dashboard - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="candidate-container">
+    <h2>Candidate Dashboard</h2>
+    <p>Welcome, {{ session.username }}!</p>
+    
+    <div class="two-panel">
+        <!-- Left Panel: My Applications -->
+        <div class="panel applications-panel">
+            <h3>My Applications</h3>
+            
+            {% if applications %}
+                <div class="applications-list">
+                    {% for app in applications %}
+                    <div class="application-card">
+                        <h4>{{ app.job.title }}</h4>
+                        <p class="application-date">Applied on: {{ app.application.applied_date.strftime('%Y-%m-%d') }}</p>
+                        <p class="application-status">Status: {{ app.application.status }}</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-data">You haven't applied to any jobs yet.</p>
+            {% endif %}
+            
+            <!-- Resume optimization tips -->
+            <div class="tips-section">
+                <h4>Resume Optimization Tips</h4>
+                <ul>
+                    <li>Include relevant <strong>keywords</strong> from job descriptions</li>
+                    <li>Clearly structure your <strong>skills, experience, and education</strong></li>
+                    <li>Quantify your achievements with <strong>numbers</strong> when possible</li>
+                    <li>Update your resume for each application to match job requirements</li>
+                </ul>
+            </div>
+        </div>
+        
+        <!-- Right Panel: Available Jobs -->
+        <div class="panel jobs-panel">
+            <h3>Available Jobs</h3>
+            
+            <div class="search-box">
+                <input type="text" id="job-search" placeholder="Search jobs...">
+            </div>
+            
+            {% if jobs %}
+                <div class="jobs-list">
+                    {% for job in jobs %}
+                    <div class="job-card">
+                        <h4>{{ job.title }}</h4>
+                        <p class="job-date">Posted on: {{ job.posted_date.strftime('%Y-%m-%d') }}</p>
+                        
+                        <div class="job-description-preview">
+                            {{ job.description[:150] }}{% if job.description|length > 150 %}...{% endif %}
+                        </div>
+                        
+                        <div class="job-actions">
+                            <button class="btn btn-small toggle-description">View Description</button>
+                            <a href="{{ url_for('apply', job_id=job._id) }}" class="btn btn-small btn-primary">Apply</a>
+                        </div>
+                        
+                        <div class="full-description" style="display: none;">
+                            {{ job.description }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-data">No jobs available at the moment. Please check back later.</p>
+            {% endif %}
+        </div>
+        {% if job and job.recruiter_info %}
+            <div class="recruiter-info">
+                <p><strong>Posted by:</strong> {{ job.recruiter_info.username }}</p>
+                <a href="{{ url_for('send_message', user_id=job.recruiter_info._id) }}" class="btn btn-small">Contact Recruiter</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

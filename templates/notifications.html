@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="notifications-container">
+    <h2>Your Notifications</h2>
+    
+    {% if notifications %}
+        <div class="notifications-list">
+            {% for notification in notifications %}
+                <div class="notification-card {% if not notification.read_status %}unread{% endif %}">
+                    <div class="notification-icon">
+                        {% if notification.type == 'interview_invitation' %}
+                            <i class="icon-calendar"></i>
+                        {% elif notification.type == 'application_update' %}
+                            <i class="icon-file"></i>
+                        {% else %}
+                            <i class="icon-bell"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="notification-content">
+                        <p class="notification-message">{{ notification.message }}</p>
+                        <p class="notification-time">{{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                    </div>
+                    
+                    {% if notification.type == 'interview_invitation' %}
+                        <div class="notification-action">
+                            <a href="{{ url_for('appointments') }}" class="btn btn-small">View Details</a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="no-data">You have no notifications at this time.</p>
+    {% endif %}
+</div>
+{% endblock %}

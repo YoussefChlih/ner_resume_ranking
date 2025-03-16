@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Messages - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="messages-container">
+    <h2>Your Messages</h2>
+    
+    <div class="message-tabs">
+        <button class="message-tab-btn active" data-tab="inbox">Inbox</button>
+        <button class="message-tab-btn" data-tab="sent">Sent</button>
+    </div>
+    
+    <div class="message-tabs-content">
+        <!-- Inbox Tab -->
+        <div id="inbox" class="message-tab-pane active">
+            {% if received_messages %}
+                <div class="message-list">
+                    {% for message in received_messages %}
+                        <div class="message-item {% if not message.read %}unread{% endif %}">
+                            <div class="message-header">
+                                <div class="message-info">
+                                    <span class="message-sender">From: {{ message.sender_name }}</span>
+                                    <span class="message-date">{{ message.sent_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                </div>
+                                {% if message.job_title %}
+                                    <div class="message-job">
+                                        <span class="job-tag">{{ message.job_title }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="message-subject">{{ message.subject }}</div>
+                            <div class="message-body">{{ message.message }}</div>
+                            
+                            <div class="message-actions">
+                                <a href="{{ url_for('reply_message', message_id=message._id) }}" class="btn btn-small">Reply</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-data">You have no messages in your inbox.</p>
+            {% endif %}
+        </div>
+        
+        <!-- Sent Tab -->
+        <div id="sent" class="message-tab-pane">
+            {% if sent_messages %}
+                <div class="message-list">
+                    {% for message in sent_messages %}
+                        <div class="message-item">
+                            <div class="message-header">
+                                <div class="message-info">
+                                    <span class="message-recipient">To: {{ message.recipient_name }}</span>
+                                    <span class="message-date">{{ message.sent_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                                </div>
+                                {% if message.job_title %}
+                                    <div class="message-job">
+                                        <span class="job-tag">{{ message.job_title }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="message-subject">{{ message.subject }}</div>
+                            <div class="message-body">{{ message.message }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-data">You have no sent messages.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

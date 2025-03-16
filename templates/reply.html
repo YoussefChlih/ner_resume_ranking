@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Reply to Message - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="reply-container">
+    <div class="reply-header">
+        <h2>Reply to Message</h2>
+        
+        <div class="back-link">
+            <a href="{{ url_for('messages') }}" class="btn">← Back to Messages</a>
+        </div>
+    </div>
+    
+    <div class="original-message">
+        <div class="message-header">
+            <div class="message-info">
+                <span class="message-sender">From: {{ sender.username }}</span>
+                <span class="message-date">{{ message.sent_at.strftime('%Y-%m-%d %H:%M') }}</span>
+            </div>
+        </div>
+        
+        <div class="message-subject">{{ message.subject }}</div>
+        <div class="message-body">{{ message.message }}</div>
+    </div>
+    
+    <div class="reply-form">
+        <h3>Your Reply</h3>
+        
+        <form method="POST" action="{{ url_for('reply_message', message_id=message._id) }}">
+            <div class="form-group">
+                <label for="reply">Message</label>
+                <textarea id="reply" name="reply" rows="6" required></textarea>
+            </div>
+            
+            <button type="submit" class="btn">Send Reply</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
