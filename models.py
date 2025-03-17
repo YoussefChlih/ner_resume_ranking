@@ -15,9 +15,8 @@ MODEL_PATH = os.path.join("data", "model")
 try:
     nlp = spacy.load(MODEL_PATH)
 except:
-    # Fallback to English model if custom model not available
-    nlp = spacy.load("en_core_web_sm")
-    print("Warning: Custom NER model not found, using default English model")
+    nlp = spacy.load("fr_core_news_sm")  # Use French model if custom model is not available
+    print("Warning: Custom NER model not found, using default French model")
 
 def extract_text_from_pdf(pdf_path):
     """Extracts text from a PDF file."""
