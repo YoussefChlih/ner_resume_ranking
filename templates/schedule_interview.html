@@ -3,92 +3,98 @@
 {% block title %}Schedule Interview - NER Resume Ranking{% endblock %}
 
 {% block content %}
-<div class="schedule-container">
-    <div class="job-header">
-        <div class="job-info">
-            <h2>Schedule Interview</h2>
-            <p><strong>Job:</strong> {{ job.title }}</p>
-            <p><strong>Candidate:</strong> {{ candidate.username }}</p>
-        </div>
-        
-        <div class="back-link">
-            <a href="{{ url_for('rankings', job_id=job._id) }}" class="btn">← Back to Rankings</a>
-        </div>
-    </div>
-    
-    <div class="two-panel">
-        <!-- Left Panel: Candidate Details -->
-        <div class="panel candidate-details-panel">
-            <h3>Candidate Information</h3>
-            
-            <div class="candidate-info">
-                <p><strong>Username:</strong> {{ candidate.username }}</p>
-                
-                {% if application.resume_path %}
-                    <p><strong>Resume:</strong> <a href="#" class="view-resume">View Resume</a></p>
-                {% endif %}
-                
-                <h4>Key Skills</h4>
-                <ul class="skills-list">
-                    {% for skill in application.skills_list|default([]) %}
-                        <li>{{ skill }}</li>
-                    {% else %}
-                        <li>No skills extracted</li>
-                    {% endfor %}
-                </ul>
-                
-                <h4>Experience</h4>
-                <ul class="experience-list">
-                    {% for exp in application.experience_list|default([]) %}
-                        <li>{{ exp }}</li>
-                    {% else %}
-                        <li>No experience extracted</li>
-                    {% endfor %}
-                </ul>
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>Schedule Interview</h2>
+                </div>
+                <div class="card-body">
+                    <div class="candidate-info mb-4">
+                        <h4>Candidate Information</h4>
+                        <p><strong>Name:</strong> {{ candidate.username }}</p>
+                        <p><strong>Position:</strong> {{ job.title }}</p>
+                    </div>
+
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="interview_date">Interview Date</label>
+                            <input type="date" class="form-control" id="interview_date" name="interview_date" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interview_time">Interview Time</label>
+                            <input type="time" class="form-control" id="interview_time" name="interview_time" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interview_type">Interview Type</label>
+                            <select class="form-control" id="interview_type" name="interview_type" required>
+                                <option value="phone">Phone Interview</option>
+                                <option value="video">Video Call</option>
+                                <option value="in-person">In-Person</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="interview_details">Interview Details</label>
+                            <textarea class="form-control" id="interview_details" name="interview_details" rows="3" 
+                                    placeholder="Enter any specific details about the interview (e.g., meeting link, location, etc.)"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="custom-control custom-switch">
+                                <input type="checkbox" class="custom-control-input" id="reminder_enabled" name="reminder_enabled">
+                                <label class="custom-control-label" for="reminder_enabled">Enable Reminders</label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                <i class="fas fa-arrow-left"></i> Back
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check"></i> Schedule Interview
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-        
-        <!-- Right Panel: Interview Form -->
-        <div class="panel interview-panel">
-            <h3>Schedule Interview</h3>
-            
-            <form method="POST" action="{{ url_for('schedule_interview', application_id=application._id) }}">
-                <div class="form-group">
-                    <label for="interview_date">Interview Date</label>
-                    <input type="date" id="interview_date" name="interview_date" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="interview_time">Interview Time</label>
-                    <input type="time" id="interview_time" name="interview_time" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="interview_type">Interview Type</label>
-                    <select id="interview_type" name="interview_type" required>
-                        <option value="video">Video Interview</option>
-                        <option value="phone">Phone Interview</option>
-                        <option value="in_person">In-Person Interview</option>
-                        <option value="technical">Technical Assessment</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="interview_details">Additional Details</label>
-                    <textarea id="interview_details" name="interview_details" rows="5" placeholder="Provide any additional details or instructions for the candidate..."></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label for="reminder_enabled" class="checkbox-label">
-                        <input type="checkbox" id="reminder_enabled" name="reminder_enabled" checked>
-                        Send appointment reminders to candidate
-                    </label>
-                    <small>Candidate will receive reminders 1 day before and 5 minutes before the interview</small>
-                </div>
-                
-                <button type="submit" class="btn">Schedule and Notify Candidate</button>
-            </form>
         </div>
     </div>
 </div>
+
+<style>
+.candidate-info {
+    background-color: #f8f9fa;
+    padding: 1rem;
+    border-radius: 0.5rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.custom-switch {
+    padding-left: 2.25rem;
+}
+
+.custom-control-input:checked ~ .custom-control-label::before {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+</style>
+
+<script>
+// Set minimum date to today
+document.getElementById('interview_date').min = new Date().toISOString().split('T')[0];
+</script>
 {% endblock %}

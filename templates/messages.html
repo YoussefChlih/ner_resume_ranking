@@ -73,4 +73,91 @@
         </div>
     </div>
 </div>
+
+<style>
+    .messages-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .message-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .message-tab-btn {
+        padding: 10px 20px;
+        border: none;
+        background-color: #f4f4f4;
+        cursor: pointer;
+        font-weight: bold;
+    }
+    .message-tab-btn.active {
+        background-color: #333;
+        color: #fff;
+    }
+    .message-tab-pane {
+        display: none;
+    }
+    .message-tab-pane.active {
+        display: block;
+    }
+    .message-list {
+        display: grid;
+        gap: 15px;
+    }
+    .message-item {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+    }
+    .message-item.unread {
+        background-color: #f0f8ff;
+    }
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .message-info {
+        display: flex;
+        gap: 10px;
+    }
+    .message-sender {
+        font-weight: bold;
+    }
+    .message-date {
+        color: #666;
+    }
+    .message-job {
+        background-color: #f4f4f4;
+        border-radius: 4px;
+        padding: 5px 10px;
+    }
+    .message-subject {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .message-body {
+        margin-bottom: 10px;
+    }
+    .message-actions {
+        display: flex;
+        gap: 10px;
+    }
+    .btn-small {
+        background-color: #333;
+        color: #fff;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .btn-small:hover {
+        background-color: #555;
+    }
+</style>
 {% endblock %}

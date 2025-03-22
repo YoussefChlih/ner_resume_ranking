@@ -1,102 +1,559 @@
 {% extends "base.html" %}
 
-{% block title %}My Profile - NER Resume Ranking{% endblock %}
+{% block title %}Mon Profil - NER Resume Ranking{% endblock %}
 
 {% block content %}
 <div class="profile-container">
-    <h2>My Profile</h2>
-    
-    <form method="POST" action="{{ url_for('profile') }}" enctype="multipart/form-data" class="profile-form">
-        <div class="profile-header">
-            <div class="profile-picture">
-                {% if profile.profile_picture %}
-                    <img src="{{ url_for('static', filename=profile.profile_picture) }}" alt="Profile Picture">
-                {% else %}
-                    <div class="default-picture">{{ session.username[0].upper() }}</div>
-                {% endif %}
-                
-                <div class="upload-control">
-                    <label for="profile_picture" class="btn btn-small">Change Photo</label>
-                    <input type="file" id="profile_picture" name="profile_picture" accept="image/*" style="display: none;">
-                </div>
+    <div class="profile-header">
+        <div class="profile-picture-section">
+            <div class="profile-picture-wrapper">
+                <img src="{{ profile.profile_picture or url_for('static', filename='images/default-avatar.png') }}" 
+                     alt="Photo de profil" class="profile-picture">
+                <button class="change-picture-btn" onclick="document.getElementById('profile-picture-input').click()">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <input type="file" id="profile-picture-input" accept="image/*" style="display: none" 
+                       onchange="updateProfilePicture(this)">
             </div>
-            
-            <div class="profile-info">
-                <h3>{{ session.username }}</h3>
-                <p class="user-type">{{ session.user_type|capitalize }}</p>
-            </div>
+            <h2>{{ profile.full_name or 'Mon Profil' }}</h2>
+            <p class="user-type">{{ 'Candidat' if user.user_type == 'candidate' else 'Recruteur' }}</p>
         </div>
-        
-        <div class="profile-section">
-            <h3>Personal Information</h3>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="full_name">Full Name</label>
-                    <input type="text" id="full_name" name="full_name" value="{{ profile.full_name }}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="first_name">First Name</label>
-                    <input type="text" id="first_name" name="first_name" value="{{ profile.first_name }}">
-                </div>
-            </div>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="email">Email</label>
-                    <input type="email" id="email" name="email" value="{{ profile.email }}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="phone">Phone</label>
-                    <input type="tel" id="phone" name="phone" value="{{ profile.phone }}">
-                </div>
-            </div>
-            
-            <div class="form-group">
-                <label for="location">Location</label>
-                <input type="text" id="location" name="location" value="{{ profile.location }}">
-            </div>
-        </div>
-        
-        <div class="profile-section">
-            <h3>Professional Information</h3>
-            
-            <div class="form-row">
-                <div class="form-group">
-                    <label for="linkedin">LinkedIn</label>
-                    <input type="url" id="linkedin" name="linkedin" value="{{ profile.linkedin }}">
-                </div>
-                
-                <div class="form-group">
-                    <label for="github">GitHub</label>
-                    <input type="url" id="github" name="github" value="{{ profile.github }}">
+    </div>
+
+    <div class="profile-content">
+        <form method="POST" class="profile-form">
+            <!-- Informations personnelles -->
+            <div class="profile-section">
+                <h3><i class="fas fa-user"></i> Informations personnelles</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="full_name">Nom complet</label>
+                        <input type="text" id="full_name" name="full_name" value="{{ profile.full_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="first_name">Prénom</label>
+                        <input type="text" id="first_name" name="first_name" value="{{ profile.first_name }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" value="{{ profile.email }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="phone">Téléphone</label>
+                        <input type="tel" id="phone" name="phone" value="{{ profile.phone }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Localisation</label>
+                        <input type="text" id="location" name="location" value="{{ profile.location }}">
+                    </div>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label for="website">Personal Website</label>
-                <input type="url" id="website" name="website" value="{{ profile.website }}">
+
+            <!-- Compétences techniques -->
+            <div class="profile-section">
+                <h3><i class="fas fa-code"></i> Compétences techniques</h3>
+                <div class="skills-container">
+                    <div class="skills-input-group">
+                        <input type="text" id="technical-skill" placeholder="Ajouter une compétence technique">
+                        <button type="button" class="btn btn-outline-primary" onclick="addSkill('technical')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="skills-list" id="technical-skills-list">
+                        {% for skill in profile.technical_skills %}
+                        <div class="skill-tag">
+                            {{ skill }}
+                            <button type="button" class="remove-skill" onclick="removeSkill(this, 'technical')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label for="bio">Bio</label>
-                <textarea id="bio" name="bio" rows="4">{{ profile.bio }}</textarea>
+
+            <!-- Compétences relationnelles -->
+            <div class="profile-section">
+                <h3><i class="fas fa-users"></i> Compétences relationnelles</h3>
+                <div class="skills-container">
+                    <div class="skills-input-group">
+                        <input type="text" id="soft-skill" placeholder="Ajouter une compétence relationnelle">
+                        <button type="button" class="btn btn-outline-primary" onclick="addSkill('soft')">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="skills-list" id="soft-skills-list">
+                        {% for skill in profile.soft_skills %}
+                        <div class="skill-tag">
+                            {{ skill }}
+                            <button type="button" class="remove-skill" onclick="removeSkill(this, 'soft')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-        </div>
-        
-        <div class="form-group">
-            <label for="language">Preferred Language</label>
-            <select id="language" name="language">
-                <option value="en">English</option>
-                <option value="fr">French</option>
-            </select>
-        </div>
-        
-        <div class="form-actions">
-            <button type="submit" class="btn">Save Profile</button>
-        </div>
-    </form>
+
+            <!-- Expérience -->
+            <div class="profile-section">
+                <h3><i class="fas fa-briefcase"></i> Expérience</h3>
+                <div id="experience-list">
+                    {% for exp in profile.experience %}
+                    <div class="experience-item">
+                        <div class="experience-header">
+                            <h4>{{ exp.title }}</h4>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExperience(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Entreprise</label>
+                                <input type="text" name="experience[{{ loop.index0 }}][company]" value="{{ exp.company }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Période</label>
+                                <input type="text" name="experience[{{ loop.index0 }}][period]" value="{{ exp.period }}">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea name="experience[{{ loop.index0 }}][description]">{{ exp.description }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-outline-primary" onclick="addExperience()">
+                    <i class="fas fa-plus"></i> Ajouter une expérience
+                </button>
+            </div>
+
+            <!-- Formation -->
+            <div class="profile-section">
+                <h3><i class="fas fa-graduation-cap"></i> Formation</h3>
+                <div id="education-list">
+                    {% for edu in profile.education %}
+                    <div class="education-item">
+                        <div class="education-header">
+                            <h4>{{ edu.degree }}</h4>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEducation(this)">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>Établissement</label>
+                                <input type="text" name="education[{{ loop.index0 }}][institution]" value="{{ edu.institution }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Période</label>
+                                <input type="text" name="education[{{ loop.index0 }}][period]" value="{{ edu.period }}">
+                            </div>
+                            <div class="form-group full-width">
+                                <label>Description</label>
+                                <textarea name="education[{{ loop.index0 }}][description]">{{ edu.description }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button type="button" class="btn btn-outline-primary" onclick="addEducation()">
+                    <i class="fas fa-plus"></i> Ajouter une formation
+                </button>
+            </div>
+
+            <!-- Liens sociaux -->
+            <div class="profile-section">
+                <h3><i class="fas fa-share-alt"></i> Liens sociaux</h3>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="linkedin">LinkedIn</label>
+                        <input type="url" id="linkedin" name="social_links[linkedin]" 
+                               value="{{ profile.social_links.linkedin }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="github">GitHub</label>
+                        <input type="url" id="github" name="social_links[github]" 
+                               value="{{ profile.social_links.github }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="website">Site web</label>
+                        <input type="url" id="website" name="social_links[website]" 
+                               value="{{ profile.social_links.website }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Enregistrer les modifications
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<style>
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.profile-header {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.profile-picture-section {
+    position: relative;
+    display: inline-block;
+}
+
+.profile-picture-wrapper {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin: 0 auto 1rem;
+}
+
+.profile-picture {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.change-picture-btn {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s;
+}
+
+.change-picture-btn:hover {
+    background: #0056b3;
+    transform: scale(1.1);
+}
+
+.user-type {
+    color: #6c757d;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+.profile-content {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+}
+
+.profile-section {
+    margin-bottom: 2rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.profile-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+
+.profile-section h3 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #495057;
+    margin-bottom: 1.5rem;
+}
+
+.profile-section h3 i {
+    color: #007bff;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.skills-container {
+    margin-top: 1rem;
+}
+
+.skills-input-group {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.skills-input-group input {
+    flex: 1;
+}
+
+.skills-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.skill-tag {
+    background: #e9ecef;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+}
+
+.remove-skill {
+    background: none;
+    border: none;
+    color: #dc3545;
+    cursor: pointer;
+    padding: 0;
+    font-size: 0.875rem;
+}
+
+.experience-item,
+.education-item {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.experience-header,
+.education-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.experience-header h4,
+.education-header h4 {
+    margin: 0;
+    color: #495057;
+}
+
+.form-actions {
+    margin-top: 2rem;
+    text-align: right;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-outline-primary {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+}
+
+.btn-outline-danger {
+    background: none;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .profile-container {
+        padding: 1rem;
+    }
+
+    .profile-header,
+    .profile-content {
+        padding: 1.5rem;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+<script>
+function updateProfilePicture(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.querySelector('.profile-picture').src = e.target.result;
+            // Here you would typically upload the file to your server
+            // and update the profile picture in the database
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function addSkill(type) {
+    const input = document.getElementById(`${type}-skill`);
+    const skill = input.value.trim();
+    if (skill) {
+        const list = document.getElementById(`${type}-skills-list`);
+        const tag = document.createElement('div');
+        tag.className = 'skill-tag';
+        tag.innerHTML = `
+            ${skill}
+            <button type="button" class="remove-skill" onclick="removeSkill(this, '${type}')">
+                <i class="fas fa-times"></i>
+            </button>
+        `;
+        list.appendChild(tag);
+        input.value = '';
+    }
+}
+
+function removeSkill(button, type) {
+    button.closest('.skill-tag').remove();
+}
+
+function addExperience() {
+    const list = document.getElementById('experience-list');
+    const index = list.children.length;
+    const item = document.createElement('div');
+    item.className = 'experience-item';
+    item.innerHTML = `
+        <div class="experience-header">
+            <h4>Nouvelle expérience</h4>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeExperience(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Entreprise</label>
+                <input type="text" name="experience[${index}][company]">
+            </div>
+            <div class="form-group">
+                <label>Période</label>
+                <input type="text" name="experience[${index}][period]">
+            </div>
+            <div class="form-group full-width">
+                <label>Description</label>
+                <textarea name="experience[${index}][description]"></textarea>
+            </div>
+        </div>
+    `;
+    list.appendChild(item);
+}
+
+function removeExperience(button) {
+    button.closest('.experience-item').remove();
+}
+
+function addEducation() {
+    const list = document.getElementById('education-list');
+    const index = list.children.length;
+    const item = document.createElement('div');
+    item.className = 'education-item';
+    item.innerHTML = `
+        <div class="education-header">
+            <h4>Nouvelle formation</h4>
+            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeEducation(this)">
+                <i class="fas fa-trash"></i>
+            </button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>Établissement</label>
+                <input type="text" name="education[${index}][institution]">
+            </div>
+            <div class="form-group">
+                <label>Période</label>
+                <input type="text" name="education[${index}][period]">
+            </div>
+            <div class="form-group full-width">
+                <label>Description</label>
+                <textarea name="education[${index}][description]"></textarea>
+            </div>
+        </div>
+    `;
+    list.appendChild(item);
+}
+
+function removeEducation(button) {
+    button.closest('.education-item').remove();
+}
+</script>
 {% endblock %}

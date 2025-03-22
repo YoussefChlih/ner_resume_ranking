@@ -37,4 +37,62 @@
         <p class="no-data">You have no notifications at this time.</p>
     {% endif %}
 </div>
+
+<style>
+    .notifications-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .notifications-list {
+        display: grid;
+        gap: 15px;
+    }
+    .notification-card {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 15px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    .notification-card.unread {
+        background-color: #f0f8ff;
+    }
+    .notification-icon {
+        font-size: 24px;
+        color: #333;
+    }
+    .notification-content {
+        flex: 1;
+    }
+    .notification-message {
+        margin: 0;
+    }
+    .notification-time {
+        color: #666;
+        font-size: 12px;
+        margin: 5px 0 0;
+    }
+    .notification-action {
+        margin-left: auto;
+    }
+    .btn-small {
+        background-color: #333;
+        color: #fff;
+        padding: 5px 10px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .btn-small:hover {
+        background-color: #555;
+    }
+    .no-data {
+        text-align: center;
+        color: #666;
+    }
+</style>
 {% endblock %}

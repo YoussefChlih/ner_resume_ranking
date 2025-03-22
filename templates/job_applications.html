@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h2>Applications for {{ job.title }}</h2>
+                    <div>
+                        <a href="{{ url_for('rankings', job_id=job._id) }}" class="btn btn-primary">
+                            <i class="fas fa-chart-line"></i> View Rankings
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if applications %}
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Candidate</th>
+                                        <th>Applied Date</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for app in applications %}
+                                    <tr>
+                                        <td>{{ app.username }}</td>
+                                        <td>{{ app.application.applied_date.strftime('%Y-%m-%d') }}</td>
+                                        <td>
+                                            <span class="badge badge-{{ app.application.status }}">
+                                                {{ app.application.status|title }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                <a href="{{ url_for('contact_candidate', candidate_id=app.application.candidate_id, job_id=job._id) }}" 
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-envelope"></i> Contact
+                                                </a>
+                                                <a href="{{ url_for('schedule_interview', application_id=app.application._id) }}" 
+                                                   class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-calendar-plus"></i> Schedule Interview
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h3>No Applications Yet</h3>
+                            <p class="text-muted">No candidates have applied for this position yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+
+.badge-pending {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.badge-interview_scheduled {
+    background-color: #17a2b8;
+    color: #fff;
+}
+
+.badge-accepted {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-rejected {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.btn-group {
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+</style>
+{% endblock %} 

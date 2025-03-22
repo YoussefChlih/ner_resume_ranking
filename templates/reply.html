@@ -3,6 +3,93 @@
 {% block title %}Reply to Message - NER Resume Ranking{% endblock %}
 
 {% block content %}
+<style>
+    .reply-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    .reply-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .reply-header h2 {
+        margin: 0;
+    }
+    .back-link a {
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .back-link a:hover {
+        background-color: #555;
+    }
+    .original-message {
+        background-color: #f9f9f9;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+    }
+    .message-info {
+        display: flex;
+        gap: 10px;
+    }
+    .message-sender {
+        font-weight: bold;
+    }
+    .message-date {
+        color: #666;
+    }
+    .message-subject {
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+    .message-body {
+        margin-bottom: 10px;
+    }
+    .reply-form {
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    .form-group label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    .form-group textarea {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .btn {
+        background-color: #333;
+        color: #fff;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+    .btn:hover {
+        background-color: #555;
+    }
+</style>
 <div class="reply-container">
     <div class="reply-header">
         <h2>Reply to Message</h2>

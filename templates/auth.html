@@ -1,81 +1,428 @@
 {% extends "base.html" %}
 
-{% block title %}Authentication - NER Resume Ranking{% endblock %}
+{% block title %}Connexion/Inscription - NER Resume Ranking{% endblock %}
 
 {% block content %}
 <div class="auth-container">
-    <div class="auth-tabs">
-        <button class="auth-tab-btn active" data-tab="login">Login</button>
-        <button class="auth-tab-btn" data-tab="register">Register</button>
-    </div>
+    <div class="auth-box">
+        <div class="auth-header">
+            <div class="auth-tabs">
+                <button class="tab-btn active" data-tab="login">
+                    <i class="fas fa-sign-in-alt"></i> Connexion
+                </button>
+                <button class="tab-btn" data-tab="register">
+                    <i class="fas fa-user-plus"></i> Inscription
+                </button>
+            </div>
+        </div>
 
-    <div class="auth-content">
-        <!-- Login Form -->
-        <div id="login" class="auth-tab-content active">
-            <h2>Login</h2>
-            <form method="POST" action="{{ url_for('auth') }}">
+        <div class="auth-content">
+            <!-- Login Form -->
+            <form id="login-form" class="auth-form active" method="POST" action="{{ url_for('auth') }}">
                 <input type="hidden" name="action" value="login">
-                
                 <div class="form-group">
-                    <label for="login-username">Username</label>
+                    <label for="login-username">
+                        <i class="fas fa-user"></i> Nom d'utilisateur
+                    </label>
                     <input type="text" id="login-username" name="username" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" name="password" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>I am a:</label>
-                    <div class="radio-group">
-                        <input type="radio" id="login-candidate" name="user_type" value="candidate" checked>
-                        <label for="login-candidate">Job Seeker</label>
-                        
-                        <input type="radio" id="login-recruiter" name="user_type" value="recruiter">
-                        <label for="login-recruiter">Recruiter</label>
+                    <label for="login-password">
+                        <i class="fas fa-lock"></i> Mot de passe
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="login-password" name="password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('login-password')">
+                            <i class="fas fa-eye"></i>
+                        </button>
                     </div>
                 </div>
-                
-                <button type="submit" class="btn">Login</button>
+                <div class="form-options">
+                    <label class="remember-me">
+                        <input type="checkbox" name="remember">
+                        <span>Se souvenir de moi</span>
+                    </label>
+                    <a href="{{ url_for('forgot_password') }}" class="forgot-password">
+                        Mot de passe oublié ?
+                    </a>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Se connecter
+                </button>
             </form>
-        </div>
-        
-        <!-- Register Form -->
-        <div id="register" class="auth-tab-content">
-            <h2>Register</h2>
-            <form method="POST" action="{{ url_for('auth') }}">
+
+            <!-- Register Form -->
+            <form id="register-form" class="auth-form" method="POST" action="{{ url_for('auth') }}">
                 <input type="hidden" name="action" value="register">
-                
                 <div class="form-group">
-                    <label for="register-username">Username</label>
+                    <label for="register-username">
+                        <i class="fas fa-user"></i> Nom d'utilisateur
+                    </label>
                     <input type="text" id="register-username" name="username" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" name="password" required>
+                    <label for="register-email">
+                        <i class="fas fa-envelope"></i> Email
+                    </label>
+                    <input type="email" id="register-email" name="email" required>
                 </div>
-                
                 <div class="form-group">
-                    <label for="register-confirm">Confirm Password</label>
-                    <input type="password" id="register-confirm" name="confirm_password" required>
-                </div>
-                
-                <div class="form-group">
-                    <label>I am a:</label>
-                    <div class="radio-group">
-                        <input type="radio" id="register-candidate" name="user_type" value="candidate" checked>
-                        <label for="register-candidate">Job Seeker</label>
-                        
-                        <input type="radio" id="register-recruiter" name="user_type" value="recruiter">
-                        <label for="register-recruiter">Recruiter</label>
+                    <label for="register-password">
+                        <i class="fas fa-lock"></i> Mot de passe
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="register-password" name="password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('register-password')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar"></div>
+                        <p class="strength-text">Force du mot de passe: <span>Faible</span></p>
                     </div>
                 </div>
-                
-                <button type="submit" class="btn">Register</button>
+                <div class="form-group">
+                    <label for="register-confirm-password">
+                        <i class="fas fa-lock"></i> Confirmer le mot de passe
+                    </label>
+                    <div class="password-input">
+                        <input type="password" id="register-confirm-password" name="confirm_password" required>
+                        <button type="button" class="toggle-password" onclick="togglePassword('register-confirm-password')">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="user-type">
+                        <i class="fas fa-user-tag"></i> Type de compte
+                    </label>
+                    <select id="user-type" name="user_type" required>
+                        <option value="">Sélectionnez un type</option>
+                        <option value="candidate">Candidat</option>
+                        <option value="recruiter">Recruteur</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> S'inscrire
+                </button>
             </form>
         </div>
     </div>
 </div>
+
+<style>
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.auth-box {
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    max-width: 500px;
+    overflow: hidden;
+}
+
+.auth-header {
+    background: #007bff;
+    padding: 1.5rem;
+}
+
+.auth-tabs {
+    display: flex;
+    gap: 1rem;
+}
+
+.tab-btn {
+    flex: 1;
+    padding: 0.75rem;
+    border: none;
+    background: none;
+    color: white;
+    font-size: 1rem;
+    cursor: pointer;
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.tab-btn.active {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.tab-btn i {
+    font-size: 1.2rem;
+}
+
+.auth-content {
+    padding: 2rem;
+}
+
+.auth-form {
+    display: none;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s;
+}
+
+.auth-form.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.form-group label i {
+    color: #007bff;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+.password-input {
+    position: relative;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 0;
+}
+
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.remember-me {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+}
+
+.forgot-password {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
+
+.password-strength {
+    margin-top: 0.5rem;
+}
+
+.strength-bar {
+    height: 4px;
+    background: #dee2e6;
+    border-radius: 2px;
+    margin-bottom: 0.25rem;
+    overflow: hidden;
+}
+
+.strength-bar::before {
+    content: '';
+    display: block;
+    height: 100%;
+    width: 0;
+    background: #dc3545;
+    transition: all 0.3s;
+}
+
+.strength-text {
+    font-size: 0.875rem;
+    color: #6c757d;
+    margin: 0;
+}
+
+.strength-text span {
+    font-weight: 500;
+}
+
+.btn {
+    width: 100%;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+@media (max-width: 480px) {
+    .auth-container {
+        padding: 1rem;
+    }
+
+    .auth-box {
+        border-radius: 0.5rem;
+    }
+
+    .auth-header {
+        padding: 1rem;
+    }
+
+    .auth-content {
+        padding: 1.5rem;
+    }
+
+    .form-options {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: flex-start;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Tab switching
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const forms = document.querySelectorAll('.auth-form');
+
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.dataset.tab;
+            
+            // Update active tab
+            tabBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            
+            // Show active form
+            forms.forEach(form => {
+                form.classList.remove('active');
+                if (form.id === `${tab}-form`) {
+                    form.classList.add('active');
+                }
+            });
+        });
+    });
+
+    // Password strength checker
+    const passwordInput = document.getElementById('register-password');
+    const strengthBar = document.querySelector('.strength-bar');
+    const strengthText = document.querySelector('.strength-text span');
+
+    passwordInput.addEventListener('input', function() {
+        const password = this.value;
+        let strength = 0;
+        let color = '#dc3545';
+        let text = 'Faible';
+
+        // Check length
+        if (password.length >= 8) strength += 25;
+
+        // Check for numbers
+        if (/\d/.test(password)) strength += 25;
+
+        // Check for lowercase letters
+        if (/[a-z]/.test(password)) strength += 25;
+
+        // Check for uppercase letters
+        if (/[A-Z]/.test(password)) strength += 25;
+
+        // Update strength bar and text
+        strengthBar.style.setProperty('--strength', `${strength}%`);
+        strengthBar.style.background = `linear-gradient(to right, ${color} var(--strength), #dee2e6 var(--strength))`;
+
+        if (strength >= 75) {
+            color = '#28a745';
+            text = 'Fort';
+        } else if (strength >= 50) {
+            color = '#ffc107';
+            text = 'Moyen';
+        }
+
+        strengthText.textContent = text;
+        strengthText.style.color = color;
+    });
+
+    // Form validation
+    const registerForm = document.getElementById('register-form');
+    const loginForm = document.getElementById('login-form');
+
+    registerForm.addEventListener('submit', function(e) {
+        const password = document.getElementById('register-password').value;
+        const confirmPassword = document.getElementById('register-confirm-password').value;
+
+        if (password !== confirmPassword) {
+            e.preventDefault();
+            alert('Les mots de passe ne correspondent pas');
+        }
+    });
+});
+
+function togglePassword(inputId) {
+    const input = document.getElementById(inputId);
+    const icon = input.nextElementSibling.querySelector('i');
+    
+    if (input.type === 'password') {
+        input.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        input.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+</script>
 {% endblock %}

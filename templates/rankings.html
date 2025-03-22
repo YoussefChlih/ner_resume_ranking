@@ -1,152 +1,92 @@
 {% extends "base.html" %}
 
-{% block title %}Candidate Rankings - NER Resume Ranking{% endblock %}
+{% block title %}Classement des candidatures - {{ job.title }}{% endblock %}
 
 {% block content %}
-<div class="rankings-container">
-    <div class="job-header">
-        <div class="job-info">
-            <h2>{{ job.title }} - Candidate Rankings</h2>
-            <p><strong>Posted:</strong> {{ job.posted_date.strftime('%Y-%m-%d') }}</p>
-            <p><strong>Status:</strong> {{ job.status }}</p>
+<div class="container py-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Classement des candidatures</h2>
+            <a href="{{ url_for('recruiter') }}" class="btn btn-light">
+                <i class="fas fa-arrow-left"></i> Retour au tableau de bord
+            </a>
         </div>
-        
-        <div class="back-link">
-            <a href="{{ url_for('recruiter') }}" class="btn">← Back to Dashboard</a>
+        <div class="card-body">
+            <h3 class="mb-4">{{ job.title }}</h3>
+            
+            {% if ranked_applications %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Position</th>
+                                <th>Candidat</th>
+                                <th>Score de correspondance</th>
+                                <th>Date de candidature</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for rank in ranked_applications %}
+                            <tr>
+                                <td>{{ loop.index }}</td>
+                                <td>{{ rank.candidate_name }}</td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar {% if rank.match_percentage >= 80 %}bg-success{% elif rank.match_percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                             role="progressbar" 
+                                             style="width: {{ rank.match_percentage }}%"
+                                             aria-valuenow="{{ rank.match_percentage }}" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            {{ rank.match_percentage }}%
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>{{ rank.application.applied_date.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="{{ url_for('view_application', application_id=rank.application._id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> Voir
+                                        </a>
+                                        <a href="{{ url_for('schedule_interview', application_id=rank.application._id) }}" 
+                                           class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-calendar"></i> Entretien
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i> Aucune candidature n'a encore été reçue pour cette offre d'emploi.
+                </div>
+            {% endif %}
         </div>
     </div>
-    
-    <div class="job-description">
-        <h3>Job Description</h3>
-        <div class="description-text">
-            {{ job.description }}
-        </div>
-        
-        {% if job.keywords %}
-        <div class="keywords-section">
-            <h4>Weighted Keywords</h4>
-            <div class="keywords-list">
-                {% for keyword, weight in job.keywords.items() %}
-                <div class="keyword-tag">
-                    <span class="keyword-text">{{ keyword }}</span>
-                    <span class="keyword-weight">{{ weight }}</span>
-                </div>
-                {% endfor %}
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    <h3>Candidate Rankings</h3>
-    {% if ranked_applicants %}
-        <div class="rankings-list">
-            {% for applicant in ranked_applicants %}
-                <div class="ranking-card">
-                    <div class="ranking-header">
-                        <h4 class="applicant-name">{{ applicant.name }}</h4>
-                        <div class="match-score">
-                            <span class="match-percentage">{{ applicant.match_percentage }}%</span>
-                            <span class="match-label">Match</span>
-                        </div>
-                    </div>
-                    
-                    <div class="entity-sections">
-                        {% if applicant.entities.get('COMPETENCES') %}
-                            <div class="entity-section">
-                                <h5>Skills</h5>
-                                <ul class="entity-list">
-                                    {% for skill in applicant.entities.get('COMPETENCES')[:5] %}
-                                        <li>{{ skill }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                        
-                        {% if applicant.entities.get('EXPERIENCE') %}
-                            <div class="entity-section">
-                                <h5>Experience</h5>
-                                <ul class="entity-list">
-                                    {% for exp in applicant.entities.get('EXPERIENCE')[:3] %}
-                                        <li>{{ exp }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                        
-                        {% if applicant.entities.get('DIPLOME') %}
-                            <div class="entity-section">
-                                <h5>Education</h5>
-                                <ul class="entity-list">
-                                    {% for edu in applicant.entities.get('DIPLOME')[:2] %}
-                                        <li>{{ edu }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endif %}
-                    </div>
-                    
-                    <!-- New section for relevance factors -->
-                    <div class="relevance-factors">
-                        <h5>Relevance Factors</h5>
-                        <ul>
-                            {% for factor in applicant.relevance_factors %}
-                                <li>{{ factor }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    
-                    <!-- New section for keyword matches -->
-                    <div class="keyword-matches">
-                        <h5>Keyword Matches</h5>
-                        <ul>
-                            {% for match in applicant.keyword_matches %}
-                                <li>{{ match }}</li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                    
-                    <div class="ranking-actions">
-                        <button class="btn btn-small toggle-details">View Details</button>
-                        <a href="#" class="btn btn-small">Contact</a>
-                    </div>
-                    
-                    <!-- New collapsible section for detailed relevance information -->
-                    <div class="relevance-details" style="display: none;">
-                        <h5>Why This Candidate Matches</h5>
-                        <ul class="relevance-factors">
-                            {% for factor in applicant.relevance_factors %}
-                                <li>{{ factor }}</li>
-                            {% endfor %}
-                        </ul>
-                        
-                        {% if applicant.keyword_matches %}
-                            <h5>Keywords Matched</h5>
-                            <ul class="keyword-matches">
-                                {% for match in applicant.keyword_matches %}
-                                    <li>{{ match }}</li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="full-details" style="display: none;">
-                        <h5>All Extracted Information</h5>
-                        {% for entity_type, entities in applicant.entities.items() %}
-                            <div class="detail-section">
-                                <h6>{{ entity_type }}</h6>
-                                <ul>
-                                    {% for entity in entities %}
-                                        <li>{{ entity }}</li>
-                                    {% endfor %}
-                                </ul>
-                            </div>
-                        {% endfor %}
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="no-data">No applications have been received for this job yet.</p>
-    {% endif %}
 </div>
+
+<style>
+.progress {
+    background-color: #f8f9fa;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    transition: width 0.6s ease;
+}
+
+.btn-group .btn {
+    margin-right: 5px;
+}
+
+.btn-group .btn:last-child {
+    margin-right: 0;
+}
+</style>
 {% endblock %}

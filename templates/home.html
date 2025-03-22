@@ -1,0 +1,204 @@
+{% extends "base.html" %}
+
+{% block title %}NER Resume Ranking System - Accueil{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="hero-section bg-primary text-white py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h1 class="display-4 fw-bold mb-4">Trouvez le candidat parfait avec l'IA</h1>
+                <p class="lead mb-4">Notre système de classement intelligent utilise le traitement du langage naturel pour analyser et classer automatiquement les CV en fonction de vos offres d'emploi.</p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('auth') }}" class="btn btn-light btn-lg">Commencer</a>
+                    <a href="#features" class="btn btn-outline-light btn-lg">En savoir plus</a>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <img src="{{ url_for('static', filename='images/hero-image.svg') }}" alt="Hero Image" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<section id="features" class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Fonctionnalités principales</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-robot fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title h5">Analyse IA</h3>
+                        <p class="card-text">Utilisation de modèles de traitement du langage naturel pour analyser les CV et les offres d'emploi.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title h5">Classement intelligent</h3>
+                        <p class="card-text">Classement automatique des candidatures basé sur la pertinence et les compétences requises.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-3x text-primary mb-3"></i>
+                        <h3 class="card-title h5">Gain de temps</h3>
+                        <p class="card-text">Automatisation du processus de recrutement pour gagner du temps et être plus efficace.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <h2 class="mb-4">Comment ça fonctionne ?</h2>
+                <div class="timeline">
+                    <div class="timeline-item mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="timeline-number bg-primary text-white rounded-circle me-3">1</div>
+                            <div>
+                                <h4 class="h5 mb-1">Créez votre offre d'emploi</h4>
+                                <p class="mb-0">Définissez les compétences et qualifications requises pour le poste.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="timeline-number bg-primary text-white rounded-circle me-3">2</div>
+                            <div>
+                                <h4 class="h5 mb-1">Recevez les candidatures</h4>
+                                <p class="mb-0">Les candidats postulent avec leurs CV en format PDF.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="timeline-number bg-primary text-white rounded-circle me-3">3</div>
+                            <div>
+                                <h4 class="h5 mb-1">Analyse automatique</h4>
+                                <p class="mb-0">Notre système analyse les CV et calcule les scores de correspondance.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="d-flex align-items-center">
+                            <div class="timeline-number bg-primary text-white rounded-circle me-3">4</div>
+                            <div>
+                                <h4 class="h5 mb-1">Classement des candidats</h4>
+                                <p class="mb-0">Visualisez les candidatures classées par pertinence.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <img src="{{ url_for('static', filename='images/how-it-works.svg') }}" alt="How it works" class="img-fluid">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose Us Section -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Pourquoi nous choisir ?</h2>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="d-flex align-items-start mb-4">
+                    <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                    <div>
+                        <h3 class="h5">Précision</h3>
+                        <p class="mb-0">Notre système utilise des algorithmes avancés pour une analyse précise des compétences et expériences.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start mb-4">
+                    <i class="fas fa-bolt text-warning fa-2x me-3"></i>
+                    <div>
+                        <h3 class="h5">Rapidité</h3>
+                        <p class="mb-0">Analyse et classement automatique des candidatures en quelques secondes.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start mb-4">
+                    <i class="fas fa-shield-alt text-info fa-2x me-3"></i>
+                    <div>
+                        <h3 class="h5">Sécurité</h3>
+                        <p class="mb-0">Protection des données et confidentialité des informations des candidats.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="d-flex align-items-start mb-4">
+                    <i class="fas fa-chart-bar text-danger fa-2x me-3"></i>
+                    <div>
+                        <h3 class="h5">Statistiques détaillées</h3>
+                        <p class="mb-0">Visualisez des statistiques et des rapports sur vos processus de recrutement.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-8 text-center">
+                <h2 class="mb-4">Prêt à transformer votre processus de recrutement ?</h2>
+                <p class="lead mb-4">Rejoignez-nous dès aujourd'hui et découvrez comment notre système peut vous aider à trouver les meilleurs talents.</p>
+                <a href="{{ url_for('auth') }}" class="btn btn-primary btn-lg">Commencer gratuitement</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.hero-section {
+    background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%);
+}
+
+.timeline-number {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+
+.card {
+    transition: transform 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.feature-icon {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #f8f9fa;
+    margin-bottom: 1rem;
+}
+</style>
+{% endblock %} 

@@ -1,71 +1,681 @@
 {% extends "base.html" %}
 
-{% block title %}Recruiter Dashboard - NER Resume Ranking{% endblock %}
+{% block title %}Tableau de bord Recruteur - NER Resume Ranking{% endblock %}
 
 {% block content %}
-<div class="recruiter-container">
-    <h2>Recruiter Dashboard</h2>
-    <p>Welcome, {{ session.username }}!</p>
-    
-    <div class="two-panel">
-        <!-- Left Panel: Job Listings -->
-        <div class="panel job-list-panel">
-            <h3>Your Job Listings</h3>
-            
-            {% if jobs %}
-                <div class="jobs-list">
-                    {% for job in jobs %}
-                    <div class="job-card">
-                        <h4>{{ job.title }}</h4>
-                        <p class="job-date">Posted on: {{ job.posted_date.strftime('%Y-%m-%d') }}</p>
-                        <p class="job-status">Status: {{ job.status }}</p>
-                        <div class="job-actions">
-                            <a href="{{ url_for('rankings', job_id=job._id) }}" class="btn btn-small">View Rankings</a>
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <p class="no-data">You haven't posted any jobs yet.</p>
-            {% endif %}
+<div class="dashboard-container">
+    <!-- En-tête du tableau de bord -->
+    <div class="dashboard-header">
+        <div class="welcome-section">
+            <h1>Bonjour, {{ user.username }} !</h1>
+            <p>Bienvenue sur votre tableau de bord recruteur</p>
         </div>
-        
-        <!-- Right Panel: Post Job Form -->
-        <div class="panel post-job-panel">
-            <h3>Post a New Job</h3>
-            
-            <form method="POST" action="{{ url_for('recruiter') }}">
-                <div class="form-group">
-                    <label for="title">Job Title</label>
-                    <input type="text" id="title" name="title" required>
+        <div class="quick-stats">
+            <div class="stat-card">
+                <i class="fas fa-briefcase"></i>
+                <div class="stat-info">
+                    <span class="stat-value">{{ jobs|length }}</span>
+                    <span class="stat-label">Offres d'emploi</span>
                 </div>
-                
-                <div class="form-group">
-                    <label for="description">Job Description</label>
-                    <textarea id="description" name="description" rows="8" required></textarea>
-                    <small>Include details about required skills, qualifications, and responsibilities.</small>
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-users"></i>
+                <div class="stat-info">
+                    <span class="stat-value">{{ total_applications }}</span>
+                    <span class="stat-label">Candidatures</span>
                 </div>
-                
-                <div class="form-group">
-                    <h4>Keyword Weighting</h4>
-                    <p class="keyword-info">Assign weights to important keywords (0.0-1.0). Higher values give more importance during matching.</p>
-                    
-                    <div class="keywords-container">
-                        <div class="keyword-row">
-                            <input type="text" name="keyword[]" placeholder="Keyword (e.g. Python)">
-                            <input type="number" name="weight[]" placeholder="Weight" min="0" max="1" step="0.1" value="0.5">
+            </div>
+            <div class="stat-card">
+                <i class="fas fa-calendar-check"></i>
+                <div class="stat-info">
+                    <span class="stat-value">{{ interviews|length }}</span>
+                    <span class="stat-label">Entretiens</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contenu principal -->
+    <div class="dashboard-content">
+        <!-- Offres d'emploi -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2><i class="fas fa-briefcase"></i> Mes offres d'emploi</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="createJob()">
+                        <i class="fas fa-plus"></i> Nouvelle offre
+                    </button>
+                </div>
+            </div>
+            <div class="job-list">
+                {% for job in jobs %}
+                <div class="job-card">
+                    <div class="job-header">
+                        <div class="job-title">
+                            <h3>{{ job.title }}</h3>
+                            <span class="job-status {{ job.status }}">
+                                <i class="fas fa-circle"></i>
+                                {{ job.status|title }}
+                            </span>
                         </div>
-                        <div class="keyword-row">
-                            <input type="text" name="keyword[]" placeholder="Keyword">
-                            <input type="number" name="weight[]" placeholder="Weight" min="0" max="1" step="0.1" value="0.5">
+                        <div class="job-actions">
+                            <button class="btn btn-outline-primary" onclick="editJob('{{ job._id }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="deleteJob('{{ job._id }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
                         </div>
                     </div>
-                    <button type="button" id="add-keyword" class="btn btn-small">+ Add Keyword</button>
+                    <div class="job-meta">
+                        <span class="location"><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                        <span class="type"><i class="fas fa-file-contract"></i> {{ job.contract_type }}</span>
+                        <span class="applications"><i class="fas fa-users"></i> {{ job.applications|length }} candidatures</span>
+                    </div>
+                    <div class="job-description">
+                        <p>{{ job.description[:200] }}...</p>
+                    </div>
+                    <div class="job-skills">
+                        {% for skill in job.required_skills[:3] %}
+                        <span class="skill-tag">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="job-footer">
+                        <div class="job-stats">
+                            <span><i class="fas fa-eye"></i> {{ job.views }} vues</span>
+                            <span><i class="fas fa-clock"></i> {{ job.posted_at|timeago }}</span>
+                        </div>
+                        <div class="card-footer">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('job_applications', job_id=job._id) }}" class="btn btn-primary">
+                                    <i class="fas fa-users"></i> Voir les candidatures
+                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton{{ job._id }}" data-bs-toggle="dropdown" aria-expanded="false">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownMenuButton{{ job._id }}">
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for('rankings', job_id=job._id) }}">
+                                                <i class="fas fa-chart-line"></i> Voir le classement
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a class="dropdown-item" href="{{ url_for('edit_job', job_id=job._id) }}">
+                                                <i class="fas fa-edit"></i> Modifier
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <form method="POST" action="{{ url_for('delete_job', job_id=job._id) }}" 
+                                                  onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette offre d\'emploi ?');">
+                                                <button type="submit" class="dropdown-item text-danger">
+                                                    <i class="fas fa-trash"></i> Supprimer
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                
-                <button type="submit" class="btn">Post Job</button>
-            </form>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Candidatures récentes -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2><i class="fas fa-file-alt"></i> Candidatures récentes</h2>
+                <div class="section-actions">
+                    <button class="btn btn-outline-primary" onclick="toggleApplicationFilters()">
+                        <i class="fas fa-filter"></i> Filtres
+                    </button>
+                </div>
+            </div>
+            <div class="application-filters" id="application-filters" style="display: none;">
+                <div class="filter-group">
+                    <label>Statut</label>
+                    <select class="form-control">
+                        <option value="">Tous</option>
+                        <option value="pending">En attente</option>
+                        <option value="reviewed">En cours de revue</option>
+                        <option value="interview">Entretien</option>
+                        <option value="accepted">Acceptée</option>
+                        <option value="rejected">Refusée</option>
+                    </select>
+                </div>
+                <div class="filter-group">
+                    <label>Offre d'emploi</label>
+                    <select class="form-control">
+                        <option value="">Toutes</option>
+                        {% for job in jobs %}
+                        <option value="{{ job._id }}">{{ job.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="application-list">
+                {% for application in recent_applications %}
+                <div class="application-card">
+                    <div class="application-header">
+                        <div class="application-title">
+                            <h3>{{ application.candidate.full_name }}</h3>
+                            <span class="job-title">{{ application.job.title }}</span>
+                        </div>
+                        <div class="application-status {{ application.status }}">
+                            <i class="fas fa-circle"></i>
+                            {{ application.status|title }}
+                        </div>
+                    </div>
+                    <div class="application-details">
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Postulé le {{ application.applied_at|date }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-star"></i>
+                            <span>Score de match: {{ application.match_score }}%</span>
+                        </div>
+                    </div>
+                    <div class="application-actions">
+                        <a href="{{ url_for('view_application', application_id=application._id) }}" class="btn btn-outline-primary">
+                            <i class="fas fa-eye"></i> Voir le profil
+                        </a>
+                        <a href="{{ url_for('schedule_interview', application_id=application._id) }}" class="btn btn-primary">
+                            <i class="fas fa-calendar-plus"></i> Planifier un entretien
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Entretiens à venir -->
+        <div class="dashboard-section">
+            <div class="section-header">
+                <h2><i class="fas fa-calendar-check"></i> Entretiens à venir</h2>
+                <div class="section-actions">
+                    <button class="btn btn-primary" onclick="scheduleInterview()">
+                        <i class="fas fa-plus"></i> Nouvel entretien
+                    </button>
+                </div>
+            </div>
+            <div class="interview-list">
+                {% for interview in interviews %}
+                <div class="interview-card">
+                    <div class="interview-header">
+                        <div class="interview-title">
+                            <h3>{{ interview.candidate.full_name }}</h3>
+                            <span class="job-title">{{ interview.job.title }}</span>
+                        </div>
+                        <div class="interview-status {{ interview.status }}">
+                            <i class="fas fa-circle"></i>
+                            {{ interview.status|title }}
+                        </div>
+                    </div>
+                    <div class="interview-details">
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>{{ interview.date|date }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-clock"></i>
+                            <span>{{ interview.time }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-video"></i>
+                            <span>{{ interview.type }}</span>
+                        </div>
+                    </div>
+                    <div class="interview-actions">
+                        <button class="btn btn-outline-primary" onclick="viewInterview('{{ interview._id }}')">
+                            <i class="fas fa-eye"></i> Voir les détails
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="cancelInterview('{{ interview._id }}')">
+                            <i class="fas fa-times"></i> Annuler
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
 </div>
+
+<style>
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.dashboard-header {
+    margin-bottom: 2rem;
+}
+
+.welcome-section {
+    margin-bottom: 2rem;
+}
+
+.welcome-section h1 {
+    font-size: 2rem;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-section p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+.quick-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+}
+
+.stat-card i {
+    font-size: 2rem;
+    color: #007bff;
+}
+
+.stat-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.stat-value {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.stat-label {
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.dashboard-section {
+    background: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-header h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #2c3e50;
+    margin: 0;
+}
+
+.section-header h2 i {
+    color: #007bff;
+}
+
+.job-filters,
+.application-filters {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.filter-group {
+    margin-bottom: 1rem;
+}
+
+.filter-group:last-child {
+    margin-bottom: 0;
+}
+
+.filter-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.job-list,
+.application-list,
+.interview-list {
+    display: grid;
+    gap: 1rem;
+}
+
+.job-card,
+.application-card,
+.interview-card {
+    background: #f8f9fa;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    transition: transform 0.3s;
+}
+
+.job-card:hover,
+.application-card:hover,
+.interview-card:hover {
+    transform: translateY(-2px);
+}
+
+.job-header,
+.application-header,
+.interview-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.job-title h3,
+.application-title h3,
+.interview-title h3 {
+    margin: 0;
+    color: #2c3e50;
+}
+
+.job-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    margin-left: 1rem;
+}
+
+.job-status i {
+    font-size: 0.5rem;
+}
+
+.job-status.active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.job-status.paused {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.job-status.closed {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.job-meta {
+    display: flex;
+    gap: 1rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.job-meta i {
+    margin-right: 0.25rem;
+}
+
+.job-description {
+    color: #495057;
+    margin-bottom: 1rem;
+}
+
+.job-skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.job-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.job-stats {
+    display: flex;
+    gap: 1rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.job-stats i {
+    margin-right: 0.25rem;
+}
+
+.application-status,
+.interview-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+}
+
+.application-status i,
+.interview-status i {
+    font-size: 0.5rem;
+}
+
+.application-status.pending,
+.interview-status.pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.application-status.reviewed,
+.interview-status.reviewed {
+    background: #cce5ff;
+    color: #004085;
+}
+
+.application-status.interview,
+.interview-status.interview {
+    background: #d4edda;
+    color: #155724;
+}
+
+.application-status.accepted,
+.interview-status.accepted {
+    background: #d1e7dd;
+    color: #0f5132;
+}
+
+.application-status.rejected,
+.interview-status.rejected {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.application-details,
+.interview-details {
+    display: flex;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.application-actions,
+.interview-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+}
+
+.btn-primary {
+    background: #007bff;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0056b3;
+}
+
+.btn-outline-primary {
+    background: none;
+    border: 1px solid #007bff;
+    color: #007bff;
+}
+
+.btn-outline-primary:hover {
+    background: #007bff;
+    color: white;
+}
+
+.btn-outline-danger {
+    background: none;
+    border: 1px solid #dc3545;
+    color: #dc3545;
+}
+
+.btn-outline-danger:hover {
+    background: #dc3545;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .dashboard-container {
+        padding: 1rem;
+    }
+
+    .dashboard-section {
+        padding: 1.5rem;
+    }
+
+    .job-header,
+    .application-header,
+    .interview-header {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .job-meta {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .job-footer {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+    }
+
+    .job-actions {
+        justify-content: stretch;
+    }
+
+    .job-actions .btn {
+        flex: 1;
+    }
+
+    .application-details,
+    .interview-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+</style>
+
+<script>
+function createJob() {
+    window.location.href = '/jobs/create';
+}
+
+function editJob(jobId) {
+    window.location.href = `/jobs/${jobId}/edit`;
+}
+
+function deleteJob(jobId) {
+    if (confirm('Êtes-vous sûr de vouloir supprimer cette offre d\'emploi ?')) {
+        fetch(`/jobs/${jobId}/delete`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+
+function viewApplications(jobId) {
+    window.location.href = `/jobs/${jobId}/applications`;
+}
+
+function toggleApplicationFilters() {
+    const filters = document.getElementById('application-filters');
+    filters.style.display = filters.style.display === 'none' ? 'block' : 'none';
+}
+
+function viewApplication(applicationId) {
+    window.location.href = `/applications/${applicationId}`;
+}
+
+function scheduleInterview(applicationId) {
+    window.location.href = `/applications/${applicationId}/schedule-interview`;
+}
+
+function viewInterview(interviewId) {
+    window.location.href = `/interviews/${interviewId}`;
+}
+
+function cancelInterview(interviewId) {
+    if (confirm('Êtes-vous sûr de vouloir annuler cet entretien ?')) {
+        fetch(`/interviews/${interviewId}/cancel`, {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
 {% endblock %}

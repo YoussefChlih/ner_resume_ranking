@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Debug - Job Information{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Debug Information</h2>
+    
+    <!-- Job Information -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Job Information</h3>
+        </div>
+        <div class="card-body">
+            <h4>{{ debug_info.job.title }}</h4>
+            <p><strong>ID:</strong> {{ debug_info.job._id }}</p>
+            <p><strong>Description:</strong> {{ debug_info.job.description }}</p>
+            <p><strong>Required Skills:</strong> {{ debug_info.job.required_skills|join(', ') }}</p>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h3>Statistics</h3>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body">
+                            <h5>Applications</h5>
+                            <h2>{{ debug_info.applications_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-success text-white">
+                        <div class="card-body">
+                            <h5>CVs</h5>
+                            <h2>{{ debug_info.cvs_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card bg-info text-white">
+                        <div class="card-body">
+                            <h5>Users</h5>
+                            <h2>{{ debug_info.users_count }}</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications Details -->
+    <div class="card">
+        <div class="card-header">
+            <h3>Applications Details</h3>
+        </div>
+        <div class="card-body">
+            {% if debug_info.applications %}
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Application ID</th>
+                                <th>Candidate</th>
+                                <th>CV</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Similarity Score</th>
+                                <th>Extracted Entities</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for app_info in debug_info.applications %}
+                            <tr>
+                                <td>{{ app_info.application._id }}</td>
+                                <td>
+                                    {% if app_info.user %}
+                                        {{ app_info.user.username }}
+                                    {% else %}
+                                        <span class="text-danger">User not found</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if app_info.cv %}
+                                        <span class="text-success">CV present</span>
+                                    {% else %}
+                                        <span class="text-danger">CV not found</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ app_info.application.status }}</td>
+                                <td>{{ app_info.application.applied_date.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                                <td>
+                                    {% if app_info.similarity_score is not none %}
+                                        <div class="progress">
+                                            <div class="progress-bar {% if app_info.similarity_score >= 0.8 %}bg-success{% elif app_info.similarity_score >= 0.6 %}bg-warning{% else %}bg-danger{% endif %}" 
+                                                 role="progressbar" 
+                                                 style="width: {{ app_info.similarity_score * 100 }}%"
+                                                 aria-valuenow="{{ app_info.similarity_score * 100 }}" 
+                                                 aria-valuemin="0" 
+                                                 aria-valuemax="100">
+                                                {{ "%.1f"|format(app_info.similarity_score * 100) }}%
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if app_info.cv_entities %}
+                                        <button class="btn btn-sm btn-info" type="button" data-bs-toggle="collapse" data-bs-target="#entities-{{ app_info.application._id }}">
+                                            View Entities
+                                        </button>
+                                        <div class="collapse mt-2" id="entities-{{ app_info.application._id }}">
+                                            <div class="card card-body">
+                                                {% for entity_type, entities in app_info.cv_entities.items() %}
+                                                    <h6>{{ entity_type }}</h6>
+                                                    <ul class="list-unstyled">
+                                                        {% for entity in entities %}
+                                                            <li>{{ entity }}</li>
+                                                        {% endfor %}
+                                                    </ul>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">No entities extracted</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-warning">
+                    No applications found for this job.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %} 

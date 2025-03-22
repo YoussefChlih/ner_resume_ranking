@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}Setup 2FA - NER Resume Ranking{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body">
+                    <h2 class="card-title text-center mb-4">
+                        <i class="fas fa-shield-alt me-2"></i>Setup Two-Factor Authentication
+                    </h2>
+                    
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert alert-info">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                    {% endwith %}
+                    
+                    <div class="text-center mb-4">
+                        <p class="mb-3">Scan this QR code with your authenticator app:</p>
+                        <img src="{{ qr_url }}" alt="2FA QR Code" class="img-fluid mb-3">
+                        <p class="text-muted small">Or manually enter this code: <code>{{ secret }}</code></p>
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading">
+                            <i class="fas fa-info-circle me-2"></i>Instructions
+                        </h5>
+                        <ol class="mb-0">
+                            <li>Download an authenticator app if you haven't already:
+                                <ul>
+                                    <li>Google Authenticator</li>
+                                    <li>Microsoft Authenticator</li>
+                                    <li>Authy</li>
+                                </ul>
+                            </li>
+                            <li>Open your authenticator app</li>
+                            <li>Add a new account by scanning the QR code</li>
+                            <li>Enter the verification code shown in your app below</li>
+                        </ol>
+                    </div>
+                    
+                    <form method="POST" class="mt-4">
+                        <div class="mb-4">
+                            <label for="token" class="form-label">Verification Code</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-key"></i>
+                                </span>
+                                <input type="text" class="form-control" id="token" name="token" 
+                                       required pattern="[0-9]{6}" maxlength="6"
+                                       placeholder="Enter 6-digit code">
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-check me-2"></i>Verify and Enable 2FA
+                            </button>
+                            <a href="{{ url_for('profile') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Format input to only allow numbers and max 6 digits
+document.getElementById('token').addEventListener('input', function(e) {
+    this.value = this.value.replace(/[^0-9]/g, '').slice(0, 6);
+});
+</script>
+{% endblock %} 
